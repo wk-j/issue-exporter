@@ -13,4 +13,5 @@ dotnet tool install -g wk.IssueExporter
 
 ```bash
 wk-issue-exporter --repo bcircle/practika-crm --token $GITHUB_TOKEN
+wk-issue-exporter --repo bcircle/practika-sale-tracking-frontend  --token $GITHUB_TOKEN
 ```

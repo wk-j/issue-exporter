@@ -29,11 +29,11 @@ namespace IssueExporter {
                 State = ItemStateFilter.All
             });
 
-            var data = issues.Select(x => new MyIssue {
+            var data = issues.OrderBy(x => x.CreatedAt).Select(x => new MyIssue {
                 CreatedAt = x.CreatedAt.DateTime.ToString("dd/MM/yyyy"),
                 Title = x.Title,
                 State = x.State.Value
-            }).OrderBy(x => x.CreatedAt);
+            });
 
             var fileName = repo.Replace("/", ".") + ".csv";
 
