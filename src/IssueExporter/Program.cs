@@ -27,7 +27,8 @@ namespace IssueExporter {
             foreach (var (x, i) in data.Select((x, i) => (x, i))) {
                 var next = i + 1;
                 array[next, 0] = x.CreatedAt;
-                array[next, 1] = x.Title.Length > 50 ? x.Title.Substring(0, 50) + "..." : x.Title;
+                // array[next, 1] = x.Title.Length > 50 ? x.Title.Substring(0, 50) + "..." : x.Title;
+                array[next, 1] = x.Title;
                 array[next, 2] = x.State.ToString();
             }
 
