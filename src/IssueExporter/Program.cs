@@ -5,6 +5,7 @@ using System.Linq;
 using System.IO;
 using CsvHelper;
 using System.Collections.Generic;
+using TableMaker;
 
 namespace IssueExporter {
 
@@ -15,6 +16,22 @@ namespace IssueExporter {
             using (var csv = new CsvWriter(writer)) {
                 csv.WriteRecords(data);
             }
+        }
+
+        static void WriteToConsole(IEnumerable<MyIssue> data) {
+            var array = new string[data.Count() + 1, 3];
+            array[0, 0] = "Created At";
+            array[0, 1] = "Title";
+            array[0, 2] = "Status";
+
+            foreach (var (x, i) in data.Select((x, i) => (x, i))) {
+                var next = i + 1;
+                array[next, 0] = x.CreatedAt;
+                array[next, 1] = x.Title.Length > 50 ? x.Title.Substring(0, 50) + "..." : x.Title;
+                array[next, 2] = x.State.ToString();
+            }
+
+            ArrayPrinter.PrintToConsole(array);
         }
 
         static async Task<IEnumerable<MyIssue>> GetIssuesAsync(string org, string repo, string token) {
@@ -43,6 +60,8 @@ namespace IssueExporter {
             var fileName = repo.Replace("/", ".") + ".csv";
 
             var data = await GetIssuesAsync(org: org, repo: repository, token: token);
+
+            WriteToConsole(data.Take(10));
             WriteToFile(fileName, data);
         }
     }
