@@ -6,6 +6,7 @@ using System.IO;
 using CsvHelper;
 using System.Collections.Generic;
 using TableMaker;
+using System.Collections;
 
 namespace IssueExporter {
 
@@ -19,10 +20,11 @@ namespace IssueExporter {
         }
 
         static void WriteToConsole(IEnumerable<MyIssue> data) {
-            var array = new string[data.Count() + 1, 3];
+            var array = new string[data.Count() + 1, 4];
             array[0, 0] = "Created At";
             array[0, 1] = "Title";
             array[0, 2] = "Status";
+            array[0, 3] = "Labels";
 
             foreach (var (x, i) in data.Select((x, i) => (x, i))) {
                 var next = i + 1;
@@ -30,6 +32,7 @@ namespace IssueExporter {
                 // array[next, 1] = x.Title.Length > 50 ? x.Title.Substring(0, 50) + "..." : x.Title;
                 array[next, 1] = x.Title;
                 array[next, 2] = x.State.ToString();
+                array[next, 3] = string.Join(",", x.Label);
             }
 
             ArrayPrinter.PrintToConsole(array);
@@ -44,10 +47,34 @@ namespace IssueExporter {
                 State = ItemStateFilter.All
             });
 
-            return issues.OrderBy(x => x.CreatedAt).Select(x => new MyIssue {
-                CreatedAt = x.CreatedAt.DateTime.ToString("dd/MM/yyyy"),
-                Title = x.Title,
-                State = x.State.Value
+            var white = new[] {
+                "bug",
+                "duplicate",
+                "enhancement",
+                "good first issue",
+                "help wanted",
+                "invalid",
+                "question",
+                "wontfix"
+            };
+
+            return issues.OrderBy(x => x.CreatedAt).Select(x => {
+                var labels = x.Labels.Select(k => k.Name);
+                //.Where(white.Contains).FirstOrDefault() ?? "";
+                var bodies = x.Body.Split('\n')
+                    .Where(k => !k.Contains("]("))
+                    .Where(k => !k.ToLower().Contains("pass"))
+                    .Select(k => k.Trim());
+                var body = string.Join(" ", bodies).Replace("#", string.Empty);
+
+                return new MyIssue {
+                    CreatedAt = x.CreatedAt.DateTime.ToString("dd/MM/yyyy"),
+                    Title = x.Title,
+                    Body = body,
+                    State = x.State.Value,
+                    Id = x.Id,
+                    Label = string.Join(", ", labels)
+                };
             });
         }
 
